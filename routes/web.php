@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
 // 首页
 Route::get('/', 'StaticPagesController@home')->name('/');
 
@@ -24,3 +21,6 @@ Route::get('/help', 'StaticPagesController@help')->name('help');
 
 // 关于页面
 Route::get('/about', 'StaticPagesController@about')->name('about');
+
+// 用户注册
+Route::get('signup', 'UsersController@create')->name('signup');
