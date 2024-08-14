@@ -6,7 +6,6 @@
         <p class="lead">
             这里是「Weibo」首页
         </p>
-
         <a class="btn btn-lg btn-success" href="{{ route('signup') }}">现在注册</a>
     </div>
 @endsection
