@@ -11,7 +11,7 @@ Route::get('signup', [UsersController::class, 'create'])->name('signup');
 
 
 // 用户资源路由
-Route::resource('users', 'UsersController');
+Route::resource('users', UsersController::class);
 // 相当于定义了
 // Route::get('/users', 'UsersController@index')->name('users.index');
 // Route::get('/users/create', 'UsersController@create')->name('users.create');
