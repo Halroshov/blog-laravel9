@@ -11,6 +11,6 @@ class UsersController extends Controller
 {
     public function create(): Factory|View|Application
     {
-        return view('users.create');
+        return view('users/create');
     }
 }
