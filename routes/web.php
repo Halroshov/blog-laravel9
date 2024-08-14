@@ -3,27 +3,29 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StaticPagesController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\SessionsController;
 
+// 定义首页路由，指向StaticPagesController的home方法，并命名为home
 Route::get('/', [StaticPagesController::class, 'home'])->name('home');
+
+// 定义帮助页面路由，指向StaticPagesController的help方法，并命名为help
 Route::get('help', [StaticPagesController::class, 'help'])->name('help');
+
+// 定义关于页面路由，指向StaticPagesController的about方法，并命名为about
 Route::get('about', [StaticPagesController::class, 'about'])->name('about');
+
+// 定义注册页面路由，指向UsersController的create方法，并命名为signup
 Route::get('signup', [UsersController::class, 'create'])->name('signup');
 
 
-// 用户资源路由
+// 用户资源路由，定义了用户相关的所有RESTful资源路由
 Route::resource('users', UsersController::class);
-// 相当于定义了
-// Route::get('/users', 'UsersController@index')->name('users.index');
-// Route::get('/users/create', 'UsersController@create')->name('users.create');
-// Route::get('/users/{user}', 'UsersController@show')->name('users.show');
-// Route::post('/users', 'UsersController@store')->name('users.store');
-// Route::get('/users/{user}/edit', 'UsersController@edit')->name('users.edit');
-// Route::patch('/users/{user}', 'UsersController@update')->name('users.update');
-// Route::delete('/users/{user}', 'UsersController@destroy')->name('users.destroy');
-// GET      /users	            UsersController@index	显示所有用户列表的页面
-// GET      /users/{user}	    UsersController@show	显示用户个人信息的页面
-// GET      /users/create	    UsersController@create	创建用户的页面
-// POST     /users	            UsersController@store	创建用户
-// GET      /users/{user}/edit	UsersController@edit	编辑用户个人资料的页面
-// PATCH    /users/{user}	    UsersController@update	更新用户
-// DELETE   /users/{user}	    UsersController@destroy	删除用户
+
+// 定义登录页面路由，指向SessionsController的create方法，并命名为login
+Route::get('login', [App\Http\Controllers\SessionsController::class, 'create'])->name('login');
+
+// 定义登录请求路由，指向SessionsController的store方法，并命名为login
+Route::post('login', [App\Http\Controllers\SessionsController::class, 'store'])->name('login');
+
+// 定义登出请求路由，指向SessionsController的destroy方法，并命名为logout
+Route::delete('logout', [SessionsController::class, 'destroy'])->name('logout');
