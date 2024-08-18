@@ -29,3 +29,5 @@ Route::post('login', [App\Http\Controllers\SessionsController::class, 'store'])-
 
 // 定义登出请求路由，指向SessionsController的destroy方法，并命名为logout
 Route::delete('logout', [SessionsController::class, 'destroy'])->name('logout');
+
+Route::get('signup/confirm/{token}', 'UsersController@confirmEmail')->name('confirm_email');
