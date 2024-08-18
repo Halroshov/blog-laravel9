@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Validation\ValidationException;
 
 class UsersController extends Controller
 {
@@ -20,7 +20,7 @@ class UsersController extends Controller
         // 未登录用户访问用户编辑页面时将被重定向到登录页面
         // 已经登录的用户才可以访问个人信息编辑页面
         $this->middleware('auth', [
-            'except' => ['show', 'create', 'store']
+            'except' => ['show', 'create', 'store', 'index']
         ]);
 
         // 只让未登录用户访问注册页面
@@ -30,7 +30,6 @@ class UsersController extends Controller
     }
 
     /**
-     * 显示用户列表
      * 显示用户注册页面
      *
      * @return Factory|View|Application
@@ -45,15 +44,53 @@ class UsersController extends Controller
      *
      * @param User $user
      * @return Factory|View|Application
-     * @throws AuthorizationException
      */
     public function show(User $user): Factory|View|Application
     {
-        $this->authorize('update', $user);
         return view('users.show', compact('user'));
     }
 
-     
+    /**
+     * 创建用户
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     * @throws ValidationException
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $this->validate($request, [
+            'name' => 'required|unique:users|max:50',
+            'email' => 'required|email|unique:users|max:255',
+            'password' => 'required|confirmed|min:6'
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password)
+        ]);
+
+        Auth::login($user);
+        session()->flash('success', '注册成功！');
+        return redirect()->route('users.show', [$user]);
+    }
+
+    /**
+     * 编辑用户信息
+     *
+     * @param User $user
+     * @return Factory|View|Application
+     * @throws AuthorizationException
+     */
+    public function edit(User $user): Factory|View|Application
+    {
+        // 使用 authorize 方法来验证用户授权策略，如果不通过则会抛出 403 异常
+        // 只有当前登录的用户为被编辑用户时才能访问编辑页面
+        $this->authorize('update', $user);
+        return view('users.edit', compact('user'));
+    }
+
     /**
      * 更新用户信息
      *
@@ -83,5 +120,16 @@ class UsersController extends Controller
 
         session()->flash('success', '个人资料更新成功！');
         return redirect()->route('users.show', $user->id);
+    }
+
+    /**
+     * 展示用户列表
+     *
+     * @return Factory|View|Application
+     */
+    public function index(): Factory|View|Application
+    {
+        $users = User::all();
+        return view('users.index', compact('users'));
     }
 }

@@ -41,6 +41,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+        /**
+     * 根据邮箱来获取当前用户的头像
+     * Gravatar 是一项用于提供全球通用头像服务的免费服务
+     * Gravatar 通过对用户的邮箱进行 MD5 加密来生成用户的全球通用头像
+     * https://www.gravatar.com/
+     *
+     * @param $size
+     * @return string
+     */
     
     public function gravatar($size = 100): string
     {
