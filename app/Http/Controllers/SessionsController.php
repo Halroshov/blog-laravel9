@@ -13,6 +13,13 @@ use Illuminate\Routing\Redirector;
 
 class SessionsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
+
     /**
      * 显示登录页面
      *
@@ -39,9 +46,11 @@ class SessionsController extends Controller
 
         // Laravel 中 Auth 的 attempt 方法可以让我们很方便的完成用户的身份认证操作
         if (Auth::attempt($credential, $request->has('remember'))) {
-            // 登录成功
+    
             session()->flash('success', '欢迎回来！');
-            return redirect()->route('users.show', [Auth::user()]);
+            $fallback = route('users.show', Auth::user());
+
+            return redirect()->intended($fallback);
         }else {
             // 登录失败
             session()->flash('danger', '抱歉，您的邮箱和密码不匹配');

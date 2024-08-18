@@ -10,11 +10,28 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class UsersController extends Controller
 {
+    public function __construct()
+    {
+        // 未登录的用户可以访问个人信息页面和注册页面
+        // 未登录用户访问用户编辑页面时将被重定向到登录页面
+        // 已经登录的用户才可以访问个人信息编辑页面
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store']
+        ]);
+
+        // 只让未登录用户访问注册页面
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
+
     /**
      * 显示用户列表
+     * 显示用户注册页面
      *
      * @return Factory|View|Application
      */
@@ -28,35 +45,43 @@ class UsersController extends Controller
      *
      * @param User $user
      * @return Factory|View|Application
+     * @throws AuthorizationException
      */
     public function show(User $user): Factory|View|Application
     {
+        $this->authorize('update', $user);
         return view('users.show', compact('user'));
     }
 
-       /**
-     * 创建用户
+     
+    /**
+     * 更新用户信息
      *
+     * @param User $user
      * @param Request $request
      * @return RedirectResponse
      * @throws ValidationException
+     * @throws AuthorizationException
      */
-    public function store(Request $request): RedirectResponse
+    public function update(User $user, Request $request): RedirectResponse
     {
+        // 使用 authorize 方法来验证用户授权策略，如果不通过则会抛出 403 异常
+        // 只有当前登录的用户为被编辑用户时才能更新用户信息
+        $this->authorize('update', $user);
         $this->validate($request, [
-            'name' => 'required|unique:users|max:50',
-            'email' => 'required|email|unique:users|max:255',
-            'password' => 'required|confirmed|min:6'
+            'name' => 'required|max:50',
+            'password' => 'nullable|confirmed|min:6'
         ]);
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password)
-        ]);
-        Auth::login($user);
-        session()->flash('success', '注册成功！');
-        return redirect()->route('users.show', [$user]);
 
+        $data = [];
+        $data['name'] = $request->name;
+        if ($request->password) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        $user->update($data);
+
+        session()->flash('success', '个人资料更新成功！');
+        return redirect()->route('users.show', $user->id);
     }
-
 }
