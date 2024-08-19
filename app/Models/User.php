@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -65,5 +67,15 @@ class User extends Authenticatable
     {
         $hash = md5(strtolower(trim($this->attributes['email'])));
         return "https://www.gravatar.com/avatar/$hash?s=$size";
+    }
+    
+    /**
+     * 一个用户拥有多条微博
+     *
+     * @return HasMany
+     */
+    public function statuses(): HasMany
+    {
+        return $this->hasMany(Status::class);
     }
 }
