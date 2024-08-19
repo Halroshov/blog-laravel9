@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -54,7 +54,7 @@ class User extends Authenticatable
         });
     }
 
-        /**
+    /**
      * 根据邮箱来获取当前用户的头像
      * Gravatar 是一项用于提供全球通用头像服务的免费服务
      * Gravatar 通过对用户的邮箱进行 MD5 加密来生成用户的全球通用头像
@@ -63,13 +63,12 @@ class User extends Authenticatable
      * @param $size
      * @return string
      */
-    
     public function gravatar($size = 100): string
     {
         $hash = md5(strtolower(trim($this->attributes['email'])));
         return "https://www.gravatar.com/avatar/$hash?s=$size";
     }
-    
+
     /**
      * 一个用户拥有多条微博
      *
@@ -79,7 +78,18 @@ class User extends Authenticatable
     {
         return $this->hasMany(Status::class);
     }
-    
+
+    /**
+     * 获取当前用户发布的所有微博
+     *
+     * @return HasMany
+     */
+    public function feed(): HasMany
+    {
+        return $this->statuses()
+            ->orderBy('created_at', 'desc');
+    }
+
     /**
      * 获取粉丝关系列表
      * 当查询我的粉丝的时候在 followers 表中查找 user_id 为当前用户 id 的记录，这时的 follower_id 就是我的粉丝
