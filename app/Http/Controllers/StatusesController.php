@@ -6,6 +6,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Models\Status;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class StatusesController extends Controller
 {
@@ -18,6 +20,10 @@ class StatusesController extends Controller
     }
 
     /**
+     *      * 发布微博
+     *
+     * @param Request $request
+     * @return RedirectResponse
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
@@ -36,4 +42,20 @@ class StatusesController extends Controller
         session()->flash('success', '发布成功！');
         return redirect()->back();
     }
+ 
+    /**
+     * 删除微博
+     *
+     * @param Status $status
+     * @return RedirectResponse
+     * @throws AuthorizationException
+     */
+    public function destroy(Status $status): RedirectResponse
+    {
+        // 1. 授权检查
+        $this->authorize('destroy', $status);
+        $status->delete();
+        session()->flash('success', '微博已被成功删除！');
+        return redirect()->back();
+    }   
 }
