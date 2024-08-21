@@ -69,6 +69,7 @@ class User extends Authenticatable
         return "https://www.gravatar.com/avatar/$hash?s=$size";
     }
 
+
     /**
      * 一个用户拥有多条微博
      *
@@ -82,11 +83,14 @@ class User extends Authenticatable
     /**
      * 获取当前用户发布的所有微博
      *
-     * @return HasMany
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function feed(): HasMany
+    public function feed(): \Illuminate\Database\Eloquent\Builder
     {
-        return $this->statuses()
+        $user_ids = $this->followings->pluck('id')->toArray();
+        array_push($user_ids, $this->id);
+        return Status::whereIn('user_id', $user_ids)
+            ->with('user')
             ->orderBy('created_at', 'desc');
     }
 
